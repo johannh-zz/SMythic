@@ -2,29 +2,1153 @@
 <html>
 
   <head>
-    <title>SMythic</title>
+    <title>Experiments in amber</title>
     <meta http-equiv="content-type" content="text/html; charset=utf-8" />
     <meta name="author" content="Johann Hibschman" />
     <script type='text/javascript' src='the.js'></script>
+<style type="text/css">
+<!--
+html {
+	height: 100%;
+	margin: 0;
+	border: 0;
+	padding: 0;
+	max-height: 100%; 
+	overflow: hidden;
+}
+
+body {
+	font-family: Verdana;
+}
+
+hr {
+	width: 75%;
+}
+
+div.pageDiv {
+	position: absolute;
+	top: 4%;
+	left: 1%;
+	height: 95%;
+	width: 98%;
+	border: solid thin black;
+}
+
+div.logArea {
+	position: absolute;
+	top: 8%;
+	left: 2%;
+	height: 74%;
+	width: 78%;
+	border: solid thin #ADD8E6;
+	padding: 2px;
+	overflow: auto;
+	z-index: 1000;
+	font-family: verdana;
+	font-size: 12pt;
+	background-color: #FFFFFF;
+}
+
+div.controlArea {
+	position: absolute;
+	top: 8%;
+	left: 82%;
+	height: 86%;
+	width: 16%;
+	padding-top: 3px;
+	padding-bottom: 3px;
+	border: solid thin #ADD8E6;
+	text-align: center;
+}
+
+div.chaosDiv {
+}
+
+div.controlPanel {
+	vertical-align: middle;
+}
+
+div.delWarning {
+	position: absolute;
+	z-index:-1;
+	top: 45%;
+	left: 37%;
+	width: 26%;
+	border: solid thin black;
+	background-color: #FFFFFF;
+	text-align: center;
+	vertical-align: middle;
+	padding: 5px;
+}
+
+div.mailBox {
+	text-align: right;
+	vertical-align: middle;
+	padding: 2px;
+}
+
+textarea.editArea {
+	position: absolute;
+	top: 84%;
+	left: 2%;
+	height: 10%;
+	width: 78%;
+	border: solid thin #ADD8E6;	
+	overflow: hidden;
+}
+
+textarea.chaosArea {
+
+	height: 1.5em;
+	width: 3.0em;
+/*
+	margin-left: 2px;
+	margin-right: 2px;
+	margin-bottom: 2px;
+	padding-top: 3px;
+	padding-left: 10px;
+	padding-right: 10px;
+	padding-bottom: 3px;
+*/
+	border: none;
+	overflow: hidden;
+	text-align: center;
+	font: bold 14pt "trebuchet ms",helvetica,sans-serif;
+}
+
+textarea.emailTA {
+	height: 1.5em;
+	width: 15.0em;
+	border: solid thin black;
+	overflow: hidden;
+}
+
+input.chaosButton {
+	width: 40px;
+	font: bold 120% "trebuchet ms",helvetica,sans-serif;
+	border: solid 1px #ADD8E6;
+	margin-bottom: 2px;
+}
+
+input.fateButton {
+	width: 60px;
+	font: bold 84% "trebuchet ms",helvetica,sans-serif;
+	border: solid 1px #ADD8E6;
+	margin-bottom: 2px;
+}
+
+input.subButton {
+	position: absolute;
+	top: 84%;
+	left: 86%;
+}
+
+input.oddsButton {
+	width: 70px;
+	font: bold 84% "trebuchet ms",helvetica,sans-serif;
+	border: solid 1px #ADD8E6;
+	margin-bottom: 2px;
+}
+
+input.adminButton {
+	width: 150px;
+	font: bold 84% "trebuchet ms",helvetica,sans-serif;
+	border: solid 1px #ADD8E6;
+	margin-bottom: 2px;
+}
+//-->
+</style>
+<script type="text/javascript">
+<!--
+/*
+GAME OBJECTS AND GLOBAL VARS
+*/
+
+var gMyth;
+var gLog;
+
+var isCTRL = false;
+
+/*
+Mythic object
+
+Methods:
+	getOdds(fDown , fAcross)
+	Arguments: two ranks in integer format between 0 and 12
+	Returns: array of three integers: exceptional yes range, yes target and exceptional no range
+	
+	roll(fDown , fAcross)
+	Arguments: none
+	Returns: an array of an integer (roll result on D100) and a string to describe the outcome
+
+	getFocus(fNum)
+	Arguments: integer between 1 and 100 to select a focus chart event
+	Returns: string describing the event
+	
+	getFocusChart()
+	Arguments: none
+	Returns: a two-dimensional array of the current focus chart.  Each array item = range bottom, range top, focus event
+	
+	getFocusNum()
+	Arguments: none
+	Returns: an integer for the current focus chart selected
+	
+	getGameDescrip()
+	Arguments: none
+	Returns: a string describing the rules for the selected focus chart
+	
+	getRandom()
+	Arguments: none
+	Returns: a string describing a random event from the action and subject arrays
+	
+	getChaos()
+	Arguments: none
+	Returns: an integer for the current Chaos Factor
+	
+	chaosUp()
+	Arguments: none
+	Sets: increments global integer ChaosFactor by 1
+	Returns: current Chaos Factor
+	
+	chaosDown()
+	Arguments: none
+	Sets: decrements global integer ChaosFactor by 1
+	Returns: current Chaos Factor
+
+	getFavour()
+	Arguments: none
+	Returns: an integer for the current Favour Points
+
+	favourUp(howFar)
+	Arguments: integer to add to current Favour Points
+	Returns: an integer for the current Favour Points
+	
+	favourDown(howFar)
+	Arguments: integer to subtract from current Favour Points
+	Returns: an integer for the current Favour Points
+
+	getGameDescrip()
+	Arguments: none
+	Returns: a string for the focus table description
+
+	
+*/
+
+function JsMythic(fFocus , fPoints) {
+
+	//fate table
+	var fateArray = new Array();
+
+	fateArray[0] = new Array(50 , 25 , 10 , 5 , 5 , 0 , 0 , -20 , -20 , -40 , -40 , -55 , -65);
+	fateArray[1] = new Array(75 , 50 , 25 , 15 , 10 , 5 , 5 , 0 , 0 , -20 , -20 , -35 , -45);
+	fateArray[2] = new Array(90 , 75 , 50 , 35 , 25 , 15 , 10 , 5 , 5 , 0 , 0 , -15 , -25);
+	fateArray[3] = new Array(95 , 85 , 65 , 50 , 45 , 25 , 15 , 10 , 5 , 5 , 5 , -5 , -15);
+	fateArray[4] = new Array(100 , 90 , 75 , 55 , 50 , 35 , 20 , 15 , 10 , 5 , 5 , 0 , -10);
+	fateArray[5] = new Array(105 , 95 , 85 , 75 , 65 , 50 , 35 , 25 , 15 , 10 , 10 , 5 , -5);
+	fateArray[6] = new Array(110 , 95 , 90 , 85 , 80 , 65 , 50 , 45 , 25 , 20 , 15 , 5 , 0);
+	fateArray[7] = new Array(115 , 100 , 95 , 90 , 85 , 75 , 55 , 50 , 35 , 25 ,20 , 10 , 5);
+	fateArray[8] = new Array(120 , 105 , 95 , 95 , 90 , 85 , 75 , 65 , 50 , 45 , 35 , 15 , 5);
+	fateArray[9] = new Array(125 , 115 , 100 , 95 , 95 , 90 , 80 , 75 , 55 , 50 , 45 , 20 , 10);
+	fateArray[10] = new Array(130 , 125 , 110 , 95 , 95 , 90 , 85 , 80 , 65 , 55 , 50 , 25 , 10);
+	fateArray[11] = new Array(150 , 145 , 130 , 100 , 100 , 95 , 95 , 90 , 85 , 80 , 75 , 50 , 25);
+	fateArray[12] = new Array(170 , 165 , 150 , 120 , 120 , 100 , 100 , 95 , 95 , 90 , 90 , 75 , 50);
+	
+	//focus table
+	var focusArray = new Array();
+
+	focusArray[0] = new Array("5/Standard game.  Regular fate chart rules." , "1/7/Remote event" , "8/28/NPC action" , "29/35/Introduce a new NPC" , "36/45/Move towards a thread" , "46/52/Move away from a thread" , "53/55/Close a thread" , "56/67/PC negative" , "68/75/PC positive" , "76/83/Ambiguous event" , "84/92/NPC negative" , "93/100/NPC positive");
+
+	focusArray[1] = new Array("4/Horror: the game starts with the Chaos Factor set to 4.  Chaos can only increase, not decrease.  When random events are generated, results of 1 to 3 within the Chaos Factor are altered scenes.  Any higher numbers will be interrupts." , "1/10/Horror - PC" , "11/23/Horror - NPC" , "24/30/Remote Event" , "31/49/NPC action" , "50/52/Introduce an NPC" , "53/55/Move toward a thread" , "56/62/Move away from a thread" , "63/72/PC Negative" , "73/75/PC positive" , "76/82/Ambiguous event" , "83/97/NPC negative" , "98/100/NPC positive");
+	
+	focusArray[2] = new Array("5/Action adventure: Double rolls on the Fate chart always result in a random event, whether they fall within the Chaos Facotr range or not.  Chaos cannot fall below 5.  Any scene which would normally lower the Chaos below 5 leaves it unchanged." , "1/16/Action!" , "17/24/Remote event" , "25/44/NPC action" , "45/52/Introduce an NPC" , "53/56/Move toward a thread" , "57/64/Move away from a thread" , "65/76/PC negative" , "77/80/PC positive" , "81/84/Ambiguous event" , "85/96/NPC negative" , "97/100/NPC positive");
+	
+	focusArray[3] = new Array("5/Mystery: the Chaos Factor cannot fall below 3.  Any scene which would normally lower the Chaos below 3 leaves it unchanged." , "1/8/Remote event" , "9/20/NPC action" , "21/32/Introduce an NPC" , "33/52/Move toward a thread" , "53/64/Move away from a thread" , "65/72/PC negative" , "73/80/PC positive" , "81/88/Ambiguous event" , "89/96/NPC negative" , "97/100/NPC positive");
+	
+	focusArray[4] = new Array("5/Social game: this game uses standard Chaos rules." , "1/12/Drop a bomb!" , "13/24/Remote event" , "25/36/NPC action" , "37/44/Introduce an NPC" , "45/56/Move toward a thread" , "57/60/Move away from a thread" , "61/64/Close a thread" , "65/72/PC negative" , "73/80/PC positive" , "81/92/Ambiguous event" , "93/96/NPC negative" , "7/100/NPC positive");
+	
+	focusArray[5] = new Array("5/Personal game: this game uses standard Chaos rules." , "1/7/Remote event" , "8/24/NPC action" , "25/28/PC NPC action" , "29/35/Introduce an NPC" , "36/42/Move toward a thread" , "43/45/Move toward a PC thread" , "46/50/Move away from a thread" , "51/52/Move away from a PC thread" , "53/54/Close thread" , "55/55/Close PC thread" , "56/67/PC negative" , "68/75/PC positive" , "76/83/Ambiguous event" , "84/90/NPC negative" , "91/92/PC NPC negative" , "93/99/NPC positive" , "100/100/PC NPC positive");
+	
+	focusArray[6] = new Array("5/Epic game: the Chaos Factor cannot fall below 3.  Any scene which would normally lower the Chaos below 3 leaves it unchanged." , "1/12/Thread escalates" , "13/16/Remote event" , "17/30/NPC action" , "31/42/Introduce an NPC" , "43/46/Move toward a thread" , "47/58/Move away from a thread" , "59/72/PC negative" , "73/80/PC positive" , "81/84/Ambiguous event" , "85/92/NPC negative" , "93/100/NPC positive");
+
+	//action chart
+	var fActionArray = new Array(
+	"Attainment" , "Starting" , "Neglect" , "Fight" , "Recruit" , "Triumph" , "Violate" , "Oppose" , "Malice" , "Communicate" , "Persecute" , "Increase" , "Decrease" , "Abandon" , "Gratify" , "Inquire" , "Antagonise" , "Move" , "Waste" , "Truce" , 
+	"Release" , "Befriend" , "Judge" , "Desert" , "Dominate" , "Procrastinate" , "Praise" , "Separate" , "Take" , "Break" , "Heal" , "Delay" , "Stop" , "Lie" , "Return" , "Imitate" , "Struggle" , "Inform" , "Bestow" , "Postpone" , 
+	"Expose" , "Haggle" , "Imprison" , "Release" , "Celebrate" , "Develop" , "Travel" , "Block" , "Harm" , "Debase" , "Overindulge" , "Adjourn" , "Adversity" , "Kill" , "Disrupt" , "Usurp" , "Create" , "Betray" , "Agree" , "Abuse" , 
+	"Oppress" , "Inspect" , "Ambush" , "Spy" , "Attach" , "Carry" , "Open" , "Carelessness" , "Ruin" , "Extravagance" , "Trick" , "Arrive" , "Propose" , "Divide" , "Refuse" , "Mistrust" , "Deceive" , "Cruelty" , "Intolerance" , "Trust" , 
+	"Excitement" , "Activity" , "Assist" , "Care" , "Negligence" , "Passion" , "Work hard" , "Control" , "Attract" , "Failure" , "Pursue" , "Vengeance" , "Proceedings" , "Dispute" , "Punish" , "Guide" , "Transform" , "Overthrow" , "Oppress" , "Change"
+	);
+
+	//subject chart
+	var fSubjectArray = new Array(
+	"Goals" , "Dreams" , "Environment" , "Outside" , "Inside" , "Realities" , "Allies" , "Enemies" , "Evil" , "Good" , "Emotions" , "Opposition" , "War" , "Peace" , "The innocent" , "Love" , "The spiritual" , "The intellectual" , "New ideas" , "Joy" , 
+	"Messages" , "Energy" , "Balance" , "Tension" , "Friendship" , "The physical" , "A project" , "Pleasures" , "Pain" , "Possessions" , "Benefits" , "Plans" , "Lies" , "Expectations" , "Legal matters" , "Bureaucracy" , "Business" , "A plan" , "News" , "Exterior factors" ,
+	"Advice" , "A plot" , "Competition" , "Prison" , "Illness" , "Food" , "Attention" , "Success" , "Failure" , "Travel" , "Jealously" , "Dispute" , "Home" , "Investment" , "Suffering" , "Wishes" , "Tactics" , "Stalemate" , "Randomness" , "Misfortune" , 
+	"Death" , "Disruption" , "Power" , "A burden" , "Intrigues" , "Fears" , "Ambush" , "Rumour" , "Wounds" , "Extravagance" , "A representative" , "Adversities" , "Opulance" , "Liberty" , "Military" , "The mundane" , "Trials" , "Masses" , "Vehicle" , "Art" , 
+	"Victory" , "Dispute" , "Riches" , "Status quo" , "Technology" , "Hope" , "Magic" , "Illusions" , "Portals" , "Danger" , "Weapons" , "Animals" , "Weather" , "Elements" , "Nature" , "The public" , "Leadership" , "Fame" , "Anger" , "Information"
+	);
+
+	var ChaosFactor = 0;
+	var gameDescrip = "";
+	var favourPoints = 0;
+	var gameChart = new Array();
+
+	this.fFocus = fFocus; //Standard, Horror, Action, Mystery, Social, Personal, Epic
+	this.fPoints = fPoints;
+	var tempArray = focusArray[fFocus][0].split("/");
+
+	for(i=0 ; i<focusArray[fFocus].length ; i++)
+		gameChart[i] = new Array(0 , 0 , "");
+		
+	//set starting chaos factor
+	ChaosFactor = parseInt(tempArray[0]);
+	//get game description
+	gameDescrip = tempArray[1];
+	//set starting Favour Points
+	favourPoints = fPoints;
+	
+	//select focus chart to use for game
+	for(i=1 ; i<focusArray[fFocus].length ; i++) {
+		tempArray = focusArray[fFocus][i].split("/");
+		for(j=0 ; j<tempArray.length ; j++) {
+			if((j+1)%3 != 0)
+				gameChart[i][j] = parseInt(tempArray[j]);
+			//end if
+			else
+				gameChart[i][j] = tempArray[j];
+			//end else
+		}//end for
+	}//end for
+
+	this.getOdds = function(fDown , fAcross) {
+		this.fDown = fDown;
+		this.fAcross = fAcross;
+		var gArray = new Array(0 , 0 , 0);
+		
+		if(0 <= fDown <=12) {
+			if(0 <= fAcross <= 12) {
+				//odds for success
+				gArray[1] = fateArray[fDown][fAcross];
+				//odds for exceptional yes
+				if(gArray[1] >= 5)
+					gArray[0] = Math.ceil(gArray[1] / 5);
+				//end if
+				//odds for exceptional no
+				if(gArray[1] <= 95)
+					gArray[2] = Math.ceil(gArray[1] + (((100 - gArray[1]) * 0.8)+1));
+				//end if
+			}//end if
+			else
+				for(i=0 ; i<gArray.length ; i++)
+					gArray[i] = -1;
+			//end if-else
+		}//end if
+		else 
+			for(i=0 ; i<gArray.length ; i++)
+				gArray[i] = -1;
+		//end else
+		
+		return gArray;
+	}//end func getOdds
+
+	this.roll = function(fDown , fAcross) {
+		this.fDown = fDown;
+		this.fAcross = fAcross;
+		var rOdds = this.getOdds(fDown , fAcross);
+		var rInt = Math.ceil(Math.random()*100);
+		var returnArray = new Array(0 , "");
+
+		if(isNaN(fDown) || isNaN(fAcross))
+			returnArray[0] = -1;
+		//end if
+		else {
+			returnArray[0] = rInt;
+			if(rInt <= rOdds[0])
+				returnArray[1] = "EXCEPTIONAL YES";
+			//end if
+			else {
+				if(rInt > rOdds[0] && rInt < rOdds[1])
+					returnArray[1] = "Yes";
+				//end if
+				else {
+					if(rInt > rOdds[1] && rInt < rOdds[2])
+						returnArray[1] = "No";
+					//end if
+					else
+						returnArray[1] = "EXCEPTIONAL NO";
+					//end else
+				}//end else
+			}//end else
+		}//end else
+
+		return returnArray;
+	}//end func roll
+
+	this.getFocus = function(fNum) {
+		this.fNum = fNum;
+		var gCnt = 1;
+		
+		if(!fNum || fNum < 1 || fNum >100)
+			return -1;
+		//end if
+		else {
+			while(fNum > gameChart[gCnt][1])
+				gCnt++;
+			//end while
+			return gameChart[gCnt][2];
+		}//end else
+	}//end func getFocus
+	
+	this.getFocusChart = function() {
+		var returnArray = this.gameChart;
+		
+		return returnArray;
+	}//end func getFocusChart
+	
+	this.getFocusNum = function() {
+		return fFocus;
+	}//end func getFocusNum
+	
+	this.getGameDescrip = function() {
+		var dArray = focusArray[fFocus].split("/");
+		
+		return dArray[1];
+	}//end func getGameDescrip
+	
+	this.getRandom = function() {
+		var gText = fActionArray[Math.ceil(Math.random()*100)] + "/" + fSubjectArray[Math.ceil(Math.random()*100)];
+
+		return gText;
+	}//end func getRandom
+
+	this.getChaos = function() {
+
+		return ChaosFactor;
+	}//end func getChaos
+	
+	this.chaosUp = function() {
+		if(ChaosFactor < 9)
+			ChaosFactor++;
+		//end if
+
+		return ChaosFactor;
+	}//end func chaosUp
+	
+	//Standard, Horror, Action, Mystery, Social, Personal, Epic
+	this.chaosDown = function() {
+		var cFocus = parseInt(fFocus);
+		var cLimit = 0;
+
+		switch (cFocus) {
+			case 0 :
+			case 4 :
+			case 5 :
+				cLimit = 1;
+				break;
+			case 1 :
+				cLimit = 4;
+				break;
+			case 2 :
+				cLimit = 5;
+				break;
+			case 3 :
+			case 6 :
+				cLimit = 3;
+				break;
+			default :
+				cLimit = 1;
+		}//end switch
+		if(ChaosFactor > cLimit)
+			ChaosFactor--;
+		//end if
+
+		return ChaosFactor;
+	}//end func chaosDown
+
+	this.getFavour = function() {
+
+	return favourPoints;
+	}//end func getFavour
+
+	this.favourUp = function(howFar) {
+		this.howFar = howFar;
+
+		favourPoints += howFar;
+
+		return favourPoints;
+	}//end func favourUp
+	
+	this.favourDown = function(howFar) {
+		this.howFar = howFar;
+
+		favourPoints -= howFar;
+
+		return favourPoints;
+	}//end func favourUp
+
+	this.getGameDescrip = function() {
+
+		return gameDescrip;
+	}//end func getGameDescrip
+	
+}//end obj JsMythic
+
+/*
+Log object
+
+Methods:
+	add(lText)
+	Arguments: string to be appended to the current log
+	Sets: global string gLog
+	Returns: current gLog as a string or -1 on failure
+	
+	clip()
+	Arguments: none
+	Sets: global string gLog (removes final entry from log)
+	Returns: current gLog as a string
+	
+	getLog()
+	Arguments: none
+	Returns: current gLog as a string
+	
+	del()
+	Arguments: none
+	Sets: changes global string gLog to 0-length string
+	Returns: 0 on success, -1 on failure
+
+	saveText()
+	Arguments: none
+	Returns: none
+	Opens new window with the text of the gamelog in it for user to save.
+
+	emailText(eAddy , eSubj)
+	Arguments: 2 strings containing email address and subject
+	Returns: none
+*/
+
+function Log() {
+
+	var gameLog = "";
+
+	this.add = function(lText) {
+		this.lText = lText;
+		
+		if(!lText || typeof(lText) != "string")
+			return -1;
+		//end if
+		else {
+			gameLog += lText;
+			if(lText.charAt(lText.length) != "\n")
+				gameLog += "\n";
+			//end if
+			return gameLog;
+		}//end else
+	}//end func add
+
+	this.clip = function() {
+		var cArray = gameLog.split("&#09;");
+		cCnt = cArray.length;
+
+		gameLog = "";
+		for(i=0 ; i<cArray.length-2 ; i++)
+			gameLog += cArray[i] + "&#09;<br />";
+		//end for
+		
+		return gameLog;
+	}//end func clip
+
+	this.getLog = function() {
+		return gameLog;
+	}//end func getLog
+
+	this.del = function() {
+		gameLog = "";
+		if(gameLog.length != 0)
+			return 1;
+		//end if
+		else
+			return 0;
+		//end else
+	}//end func del
+
+	this.saveText = function() {
+		var textWindow = window.open("" , "textWindow" , "menubar=1,location=0");
+		var strArray = this.getLog().split("\n");
+		var sText = "";
+		//replace newline characters with <br />
+		for(i=0 ; i<strArray.length ; i++)
+			sText += strArray[i] + "<br />";
+		//end for
+		textWindow.document.write(sText);
+	}//end func saveText
+
+	this.emailText = function(eAddy , eSubj) {
+		this.eAddy = eAddy;
+		this.eSubj = eSubj;
+		var strArray = this.getLog().split("\n");
+		var eBody = "";
+
+		//remove newline characters from text and replace with mail-format newlines
+		for(i=0 ; i< strArray.length ; i++)
+			eBody = eBody + strArray[i] + "%0d%0a";
+		//end for
+		//open new email message
+		location.href = "mailto:" + eAddy + "?subject=" + eSubj + "&body=" + eBody;
+	}//end func emailText
+
+}//end obj Log
+
+
+/*
+DICE FUNCTIONS
+*/
+
+function d10() {
+	//simulates the roll of a d10 die
+	return Math.ceil(Math.random()*10);
+}//end func d10
+
+function d100() {
+	//simulates the roll of a d100 die
+	return Math.ceil(Math.random()*100);
+}//end func d100
+
+/*
+INIT FUNCTIONS
+*/
+
+function init() {
+	//sets up game variables
+	var iTable = document.getElementById("selectFocus");
+	var iLog = document.getElementById("logArea");
+	var iSelect = document.getElementById("chooseFocus");
+	var iFavour = parseInt(document.getElementById("startFavourCount").value);
+	var iEdit = document.getElementById("editArea");
+
+	if(isNaN(iFavour))
+		iFavour = 50; //if no Favour value selected, set to default
+	//end if
+	gMyth = new JsMythic(iSelect.value , iFavour); //create and initialise game object
+	gLog  = new Log(); //create game log object
+	varSet();
+	iTable.style.zIndex = -1;
+	//this next line added to correct for IE6's deficient CSS support
+	iSelect.style.visibility = 'hidden';
+	iLog.style.zIndex = 1001;
+	iEdit.style.zIndex = 1001;
+	shiftText(gMyth.getGameDescrip() + "<br />");  //display ruleset for selected focus chart
+	iEdit.value = "Type here and press CTRL + Enter to add to log.";
+}//end func init
+
+function varSet() {
+	//updates chaos and favour numbers in the interface
+	document.getElementById("chaosArea").value = gMyth.getChaos().toString();
+	document.getElementById("favourArea").value = gMyth.getFavour().toString();
+}//end func cSet
+
+/*
+MYTHIC FUNCTIONS
+*/
+
+function cDown() {
+	//lowers chaos by 1 if focus rules permit
+	var cText = document.getElementById("chaosArea");
+	var cCnt = cText.value;
+	cText.value = gMyth.chaosDown().toString();
+	if(cText.value == cCnt)
+		shiftText("-- Chaos already at minimum --");
+	//end if
+	else
+		if(gMyth.getFocusNum() == 1)
+			shiftText("Chaos should not be decreased in a horror game!<br />-- Chaos decreased --");
+		//end if
+		else
+			shiftText("-- Chaos decreased --");
+	//end else
+}//end func cDown
+
+function cUp() {
+	//raises chaos by 1 if focus rules permit
+	var cText = document.getElementById("chaosArea");
+	var cCnt = cText.value;
+	cText.value = gMyth.chaosUp().toString();
+	if(cText.value == cCnt)
+		shiftText("-- Chaos already at maximum --");
+	//end if
+	else
+		shiftText("-- Chaos increased --");
+	//end else
+}//end func cDown
+
+function fUp() {
+	//increases favour points by number entered by user
+	var howFar = parseInt(document.getElementById("favourCount").value);
+
+	document.getElementById("favourArea").value = gMyth.favourUp(howFar);
+	shiftText("-- " + howFar + " favour points added --");
+	favourDivHide();
+}//end func fUp
+
+function fDown() {
+	//lowers favour points by number entered by user
+	var howFar = parseInt(document.getElementById("favourCount").value);
+
+	document.getElementById("favourArea").value = gMyth.favourDown(howFar);
+	shiftText("-- " + howFar + " favour points spent --");
+	favourDivHide();
+}//end func fDown
+
+function rankVsCheck() {
+	//simulates a rank vs rank roll on the fate chart
+	var rDown = parseInt(document.getElementById("rankDown").value) + parseInt(document.getElementById("modDown").value);
+	var rAcross = parseInt(document.getElementById("rankAcross").value) + parseInt(document.getElementById("modAcross").value);
+	var oddsArray = gMyth.getOdds(rDown , rAcross);
+	var resultArray = gMyth.roll(rDown , rAcross);
+	var rText = "Odds: " + oddsArray[0] + "/" + oddsArray[1] + "/" + oddsArray[2] + "\nResult: " + resultArray[0] + " -- " + resultArray[1];
+	
+	//check for doubles, see if Chaos Factor calls for a random event
+	if(resultArray[0]%11 == 0  && (resultArray[0]/11) <= gMyth.getChaos())
+		rText += "\nRANDOM EVENT: " + randomEvent(0);
+	//end if
+	shiftText(rText);
+}//end func rankVsCheck
+
+function oddsCheck() {
+	//simulates an odds vs chaos roll on the fate chart
+	var oDown = parseInt(document.getElementById("oddsSelect").value);
+	var oAcross = 10 - gMyth.getChaos();
+	var oddsArray = gMyth.getOdds(oDown , oAcross);
+	var resultArray = gMyth.roll(oDown , oAcross);
+	var oText = "Odds: " + oddsArray[0] + "/" + oddsArray[1] + "/" + oddsArray[2] + "\nResult: " + resultArray[0] + " -- " + resultArray[1];
+	
+	//check for doubles, see if Chaos Factor calls for a random event
+	if(resultArray[0]%11 == 0  && (resultArray[0]/11) <= gMyth.getChaos())
+		oText += "\nRANDOM EVENT: " + randomEvent(0);
+	//end if
+	shiftText(oText);
+}//end func oddsCheck
+
+function randomEvent(rFormat) {
+	//gets a random event from the focus chart
+	var rText = "";
+
+	if(rFormat == 1) 
+		//add formatting
+		rText = "RANDOM EVENT: ";
+	//end if
+	rText += gMyth.getFocus(d100()) + " -- " + gMyth.getRandom();
+	if(rFormat == 1)
+		shiftText(rText);
+	//end if
+	else
+		return rText;
+	//end else
+}//end func randomEvent
+
+function generateScene() {
+	//rolls vs chaos to see whether the scene set up by the user is altered or interrupted
+	var gText = "--------------------------------------------------------------------------------\n";
+	var gCnt = d10();
+	
+	if(document.getElementById("editArea").value = "\n") 
+		gText += "New scene\n\nChaos roll: " + gCnt;
+	//end if
+	if(gMyth.getFocusNum() == 1) {//horror game
+		if(gCnt <= gMyth.getChaos()) {
+			if(gCnt > 3) {
+				gText += "\nINTERRUPT SCENE: " + gMyth.getFocus(d100()) + " -- " + randomEvent(0);
+				//alert(gText);
+				//end if
+			}else
+				gText += "\nALTERED SCENE";
+			//end else
+		}//end if
+	}//end if
+	else //if not a horror game, normal even: interrupt/odd: altered rules apply
+		if(gCnt <= gMyth.getChaos()) {
+			if(gCnt%2 ==0) {
+				gText += "\nINTERRUPT SCENE: " + gMyth.getFocus(d100()) + " -- " + randomEvent(0);
+				//alert(gText);
+				//end if
+			}else
+				gText += "\nALTERED SCENE";
+			//end else
+		}//end if
+	//end else
+	gText += "\n";
+	shiftText(gText);
+
+}//end func generateScene
+
+function saveLog() {
+	//exports log to text window for user to save
+	gLog.saveText();
+	saveDivHide();
+}//end func saveLog
+
+/*
+INTERFACE FUNCTIONS
+*/
+
+function saveDivShow() {
+	//makes log save window visible
+	document.getElementById("saveDiv").style.zIndex = 1001;
+}//end func saveDivShow
+
+function saveDivHide() {
+	//hides log save window
+	document.getElementById("saveDiv").style.zIndex = -1;
+}//end func saveDivHide
+
+function favourDivShow() {
+	//makes favour points alteration screen visible
+	document.getElementById("selectFavour").style.zIndex = 1001;
+}//end func favourDivShow
+
+function favourDivHide() {
+	//hides favour points alteration screen
+	document.getElementById("selectFavour").style.zIndex = -1;
+}//end func favourDivHide
+
+function emailDivShow() {
+	//makes game log email options screen visible
+	document.getElementById("emailDiv").style.zIndex = 1001;
+}//end func emailDivShow
+
+function emailDivHide() {
+	//hides game log email options screen
+	document.getElementById("emailDiv").style.zIndex = -1;
+}//end func emailDivHide
+
+function clearDivShow() {
+	//makes game log delete screen visible
+	document.getElementById("delWarning").style.zIndex = 1001;
+}//end func clearDivShow
+
+function clearDivHide() {
+	//hides game log delete screen
+	document.getElementById("delWarning").style.zIndex = -1;
+}//end func clearDivHide
+
+function emailLog(eAddy , eSubj) {
+	//opens a new email in PC's default mail client with address and subject provided by user, and game log as the text
+	gLog.emailText(eAddy , eSubj);
+	emailDivHide();
+}//end func emailLog
+
+function clipLog() {
+	//removes the last update from the game log
+	var logText = document.getElementById("logArea");
+	gLog.clip();
+	logText.innerHTML = gLog.getLog();
+}//end func clipLog
+
+function clearLog() {
+	//deletes game log
+	var logText = document.getElementById("logArea");
+	gLog.del();
+	logText.innerHTML = "";
+	clearDivHide();
+}//end func clearLog
+
+function shiftText(inText) {
+	//moves text from the edit window to the log screen
+	var editArea = document.getElementById("editArea");
+	var sLog = document.getElementById("logArea");
+	var sTemp = "";
+	var sError = 0;
+	var sArray = new Array();
+	var sText = "";
+	sText += editArea.value;	
+	if(inText)
+		sText += "<br />" + inText;
+	//end if
+	sText +="&#09;<br />";
+	sError = gLog.add(sText);
+	if(sError == -1)
+		alert("Error: log object failed to update game log");
+	//end if
+	else {
+		sArray = gLog.getLog().split("\n");
+		for(i=0 ; i<sArray.length-1 ; i++)
+			sTemp += sArray[i] + "<br />";
+		//end for
+		sLog.innerHTML =  sTemp;
+		editArea.value = "";
+	}//end else
+	scrollText();
+}//end func shiftText
+
+function scrollText() {
+	//scrolls game log area to end of text
+	var sArea = document.getElementById("logArea");
+	sArea.scrollTop = sArea.scrollHeight;
+}//end func scrollText
+
+function checkCTRL(evt) {
+	//checks to see if CTRL key has been pressed
+	evt = (evt) ? evt : window.event;
+
+	switch (evt.which) {
+		case 17 :
+			isCTRL = false;
+			break;
+		default :
+	}//end switch
+}//end func checkCTRL
+
+function checkKey(evt) {
+	//checks to see which key has been pressed
+	evt = (evt) ? evt : window.event;
+	var cCode;
+	
+	if(evt.charCode)
+		cCode = evt.charCode;
+	//end if
+	else
+		cCode = evt.keyCode;
+	//end else
+	if(cCode == 17) 
+		isCTRL = true;
+	//end if
+	if(isCTRL) 
+		switch (cCode) {
+			case 13 : // Enter
+				shiftText();
+				break;
+		default :
+		}//end switch
+	//end if
+}//end func checkKey
+
+function selectFocusShow() {
+	//makes game config options screen visible
+	document.getElementById("selectFocus").style.zIndex = 1001;
+}//end func selectFocusShow
+
+document.onkeydown = checkKey;
+document.onkeyup = checkCTRL;
+//-->
+</script>
   </head>
 
-  <body>
-  <p>Hi, Johann Hibschman! Welcome to Amber project: "SMythic".</p>
-  <p>This is the place for your application's HTML. After getting familiar with Amber,
-      just remove this welcome contents from index.html and replace it with your own.</p>
+  <body onLoad="selectFocusShow();">
+<!--
   <button id="amber-with">Hello from TagBrush >> with:</button>
   <button id="jquery-append">Hello from jQuery append</button>
   <ol id="output-list"></ol>
+-->
   <script type='text/javascript'>
       require(['app'], function (amber) {
           amber.initialize({
             //used for all new packages in IDE
-            'transport.defaultAmdNamespace': "amber-smythic"
+            'transport.defaultAmdNamespace': "amber-experimentsinamber"
           });
           require(["amber-ide-starter-dialog"], function (dlg) { dlg.start(); });
-          amber.globals.SMythic._start();
+          amber.globals.ExperimentsInAmber._start();
       });
   </script>
+
+<!--
+PAGE BORDER
+//-->
+<div id='pageDiv' class='pageDiv'></div>
+
+<!--
+GAME LOG WINDOW
+//-->
+<div id='logArea' class='logArea'></div>
+
+<!--
+EDIT WINDOW
+//-->
+<textarea id='editArea' class='editArea' onClick='document.getElementById("editArea").value = "";'></textarea>
+
+<!--
+FOCUS TABLE SELECTION
+//-->
+
+<div id='selectFocus' class='delWarning'>
+<br />Choose focus table:
+<select id='chooseFocus'>
+<option value='0' selected='selected'>Standard</option>
+<option value='1'>Horror</option>
+<option value='2'>Action</option>
+<option value='3'>Mystery</option>
+<option value='4'>Social</option>
+<option value='5'>Personal</option>
+<option value='6'>Epic</option>
+</select>
+<br /><br />
+Enter starting favour points:
+<textarea id='startFavourCount' class='chaosArea' style='border: solid thin black;'></textarea>
+<br /><br />
+<input type='button' id='chooseFocusButton' class='favourButton' value='Start' onClick='init();'></input>
+<br /><br />
+</div>
+
+<!--
+SAVE LOG INSTRUCTIONS
+//-->
+<div id='saveDiv' class='delWarning'>
+<br />
+Please Click "File" then "Save as" in the new window to select a file name to save the log to.<br /><br />
+<input type="button" id='yesLogButton' class='favourButton' value="Save" onClick="saveLog();"></input>
+<input type="button" id='noLogButton' class='favourButton' value="Cancel" onClick="saveDivHide();"></input>
+</div>
+
+<!--
+CLEAR LOG WARNING WINDOW
+//-->
+<div id='delWarning' class='delWarning'>
+<br />Really delete log?<br /><br />
+<input type='button' id='clearYesButton' class='favourButton' value='Yes' onClick='clearLog();'></input>
+<input type='button' id='clearNoButton' class='favourButton' value='No' onClick='clearDivHide();'></input>
+<br /><br />
+</div>
+
+<!--
+FAVOUR CONTROLS
+//-->
+<div id='selectFavour' class='delWarning'>
+Change Favour Points
+<br /><br />Enter amount:
+<textarea id='favourCount' class='chaosArea' style='border: solid thin black;'></textarea>
+<br /><br />
+<input type='button' id='plusfavourButton' class='favourButton' value='Add' onClick='fUp();'></input>
+<input type='button' id='minusfavourButton' class='favourButton' value='Spend' onClick='fDown();'></input>
+<input type='button' id='cancelfavourButton' class='favourButton' value='Cancel' onClick='favourDivHide();'></input>
+<br /><br />
+</div>
+
+<!--
+EMAIL LOG GET ADDRESS WINDOW
+//-->
+<div id='emailDiv' class='delWarning'>
+Email game log
+<br /><br />
+<div class='mailbox'>
+Address: <textarea id='addressTA' class='emailTA'></textarea>
+<br />
+Subject: <textarea id='subjectTA' class='emailTA'></textarea>
+</div>
+<br /></br />
+<input type='button' id='clearYesButton' class='favourButton' value='Send' onClick='emailLog(document.getElementById("addressTA").value , document.getElementById("subjectTA").value);'></input>
+<input type='button' id='clearNoButton' class='favourButton' value='Cancel' onClick='emailDivHide();'></input>
+<br /><br />
+</div>
+
+<!--
+MENU COLUMN
+//-->
+<div id='controlArea' class='controlArea'>
+<div id='chaosDiv' class='chaosDiv'>
+Chaos Factor
+<br />
+<input type='button' id='chaosDownButton' class='chaosButton' value='-' onClick='cDown();'></input><textarea readonly='readonly' id='chaosArea' class='chaosArea' ></textarea><input type='button' id='chaosUpButton' class='chaosButton' value='+' onClick='cUp();'></input>
+<br /><br />
+Favour points
+<br />
+<textarea readonly='readonly' id='favourArea' class='chaosArea' ></textarea>
+<br />
+<input type='button' id='favourChangeButton' class='oddsButton' value='Change' onClick='favourDivShow();'></input>
+
+</div>
+<hr />
+<div id='rankDiv'>
+Rank vs Rank
+<br />
+<select id='rankDown'>
+<option value='0'>Miniscule 2+</option>
+<option value='1'>Miniscule</option>
+<option value='2'>Weak</option> 
+<option value='3'>Low</option> 
+<option value='4'>Below average</option> 
+<option value='5' selected='selected'>Average</option> 
+<option value='6'>Above average</option> 
+<option value='7'>High</option> 
+<option value='8'>Exceptional</option> 
+<option value='9'>Incredible</option> 
+<option value='10'>Awesome</option> 
+<option value='11'>Superhuman</option> 
+<option value='12'>Superhuman 2 +</option> 
+</select>
+<select id='modDown'>
+<option value='-4'>-4</option>
+<option value='-3'>-3</option>
+<option value='-2'>-2</option>
+<option value='-1'>-1</option>
+<option value='0' selected='selected'>+0</option>
+<option value='1'>+1</option>
+<option value='2'>+2</option>
+<option value='3'>+3</option>
+<option value='4'>+4</option>
+</select>
+<br />VS<br />
+<select id='rankAcross'>
+<option value='0'>Miniscule 2+</option>
+<option value='1'>Miniscule</option>
+<option value='2'>Weak</option> 
+<option value='3'>Low</option> 
+<option value='4'>Below average</option> 
+<option value='5' selected='selected'>Average</option> 
+<option value='6'>Above average</option> 
+<option value='7'>High</option> 
+<option value='8'>Exceptional</option> 
+<option value='9'>Incredible</option> 
+<option value='10'>Awesome</option> 
+<option value='11'>Superhuman</option> 
+<option value='12'>Superhuman 2 +</option>  
+</select>
+<select id='modAcross'>
+<option value='-4'>-4</option>
+<option value='-3'>-3</option>
+<option value='-2'>-2</option>
+<option value='-1'>-1</option>
+<option value='0' selected='selected'>+0</option>
+<option value='1'>+1</option>
+<option value='2'>+2</option>
+<option value='3'>+3</option>
+<option value='4'>+4</option>
+</select>
+<br /><br />
+<input type='button' id='skillbutton' class='oddsButton' value='Roll' onClick='rankVsCheck();'></input>
+<br /><br />
+Odds check
+<br />
+<select id='oddsSelect'>
+<option value='1'>Impossible</option>
+<option value='2'>No way</option> 
+<option value='3'>Very unlikely</option> 
+<option value='4'>Unlikely</option> 
+<option value='5' selected='selected'>50/50</option> 
+<option value='6'>Somewhat likely</option> 
+<option value='7'>Likely</option> 
+<option value='8'>Very likely</option> 
+<option value='9'>Near sure thing</option> 
+<option value='10'>A sure thing</option> 
+<option value='11'>Has to be</option> 
+</select>
+<br />VS Chaos
+<br /><br />
+
+<input type='button' id='oddsButton' class='oddsButton' value='Roll' onClick='oddsCheck();'></input>
+<br /><br />
+<input type='button' id='randomButton' class='adminButton' value='Random event' onClick='shiftText(randomEvent(0));'></input>
+<input type='button' id='sceneButton' class='adminButton' value='Generate scene' onClick='generateScene();'></input>
+</div>
+<hr />
+<div id='gameDiv'>
+<input type='button' id='savelogButton' class='adminButton' value='Export log' onClick='saveDivShow();'></input>
+<input type='button' id='emailButton' class='adminButton' value='Email log' onClick='emailDivShow();'></input>
+<input type='button' id='emailButton' class='adminButton' value='Clip log' onClick='clipLog();'></input>
+<input type='button' id='clearLogButton' class='adminButton' value='Clear log' onClick='clearDivShow();'></input>
+</div>
+<!---
+<br /><br /><hr /><br />
+<input type='button' name='addTextButton' id='addTextButton' class='adminButton' value='Add' onClick='shiftText();'></input>
+//-->
+</div>
   </body>
 
 </html>

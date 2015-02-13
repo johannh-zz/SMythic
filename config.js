@@ -5,8 +5,8 @@ if (!require) require = {config: function (x) {require = x;}};
 require.config({
   "paths": {
     "helios/showdown": "bower_components/showdown/src/showdown",
-    "requireJS": "node_modules/requirejs/require",
     "require-css": "bower_components/require-css",
+    "requireJS": "node_modules/requirejs/require",
     "jquery": "bower_components/jquery/jquery",
     "jquery-ui": "bower_components/jquery-ui/jquery-ui",
     "codemirror": "bower_components/codemirror",
@@ -23,15 +23,15 @@ require.config({
     "amber_core": "bower_components/amber/src",
     "amber-smythic": "src"
   },
-  "rjs_comment1": "require.min should be removed",
-  "rjs_comment2": "it's backward compatibility hack if config finds",
-  "rjs_comment3": "support/requirejs before node_modules/requirejs;",
-  "rjs_comment4": "the former will go away in 0.14.0",
   "map": {
     "*": {
       "css": "require-css/css"
     }
   },
+  "rjs_comment1": "require.min should be removed",
+  "rjs_comment2": "it's backward compatibility hack if config finds",
+  "rjs_comment3": "support/requirejs before node_modules/requirejs;",
+  "rjs_comment4": "the former will go away in 0.14.0",
   "shim": {
     "jquery-ui": {
       "deps": [
