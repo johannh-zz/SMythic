@@ -1,0 +1,37 @@
+{
+    "name": "smythic",
+    "description": "Mythic in Smalltalk",
+    "version": "0.1.0",
+    "ignore": [
+        "**/.*",
+        "node_modules",
+        "bower_components",
+        "/*.js",
+        "/*.html",
+        "test",
+        "tests"
+    ],
+    "authors": [
+        {
+            "name": "Johann Hibschman",
+            "email": "johannh@gmail.com"
+        }
+    ],
+    "homepage": "https://github.com/johann/SMythic",
+    "keywords": [
+        "Amber",
+        "Smalltalk"
+    ],
+    "license": [
+        "MIT"
+    ],
+    "private": false,
+    "dependencies": {
+        "amber": "^0.14.1"
+    },
+    "devDependencies": {
+        "amber-ide-starter-dialog": "^0.1.0",
+        "amber-attic": "^0.1.0",
+        "helios": "^0.3.0"
+    }
+}
