@@ -238,7 +238,7 @@ messageSends: ["initializeWithQuery:", "basicNew"]
 $globals.SMLog.klass);
 
 
-$core.addClass('SMythic', $globals.Object, [], 'SMythic');
+$core.addClass('SMythic', $globals.Object, ['log'], 'SMythic');
 $core.addMethod(
 $core.method({
 selector: "augmentPage",
@@ -350,6 +350,80 @@ messageSends: ["append:", "asJQuery"]
 }),
 $globals.SMythic);
 
+$core.addMethod(
+$core.method({
+selector: "initialize",
+protocol: 'starting',
+fn: function (){
+var self=this;
+function $SMLog(){return $globals.SMLog||(typeof SMLog=="undefined"?nil:SMLog)}
+//>>excludeStart("ctx", pragmas.excludeDebugContexts);
+return $core.withContext(function($ctx1) {
+//>>excludeEnd("ctx");
+(
+//>>excludeStart("ctx", pragmas.excludeDebugContexts);
+$ctx1.supercall = true, 
+//>>excludeEnd("ctx");
+$globals.SMythic.superclass.fn.prototype._initialize.apply($recv(self), []));
+//>>excludeStart("ctx", pragmas.excludeDebugContexts);
+$ctx1.supercall = false;
+//>>excludeEnd("ctx");;
+self["@log"]=$recv($SMLog())._newWithQuery_("#logArea");
+return self;
+//>>excludeStart("ctx", pragmas.excludeDebugContexts);
+}, function($ctx1) {$ctx1.fill(self,"initialize",{},$globals.SMythic)});
+//>>excludeEnd("ctx");
+},
+//>>excludeStart("ide", pragmas.excludeIdeData);
+args: [],
+source: "initialize\x0a\x09super initialize.\x0a\x09log := SMLog newWithQuery: '#logArea'",
+referencedClasses: ["SMLog"],
+//>>excludeEnd("ide");
+messageSends: ["initialize", "newWithQuery:"]
+}),
+$globals.SMythic);
+
+$core.addMethod(
+$core.method({
+selector: "log",
+protocol: 'starting',
+fn: function (){
+var self=this;
+var $1;
+$1=self["@log"];
+return $1;
+
+},
+//>>excludeStart("ide", pragmas.excludeIdeData);
+args: [],
+source: "log\x0a\x09^ log",
+referencedClasses: [],
+//>>excludeEnd("ide");
+messageSends: []
+}),
+$globals.SMythic);
+
+
+$globals.SMythic.klass.iVarNames = ['default'];
+$core.addMethod(
+$core.method({
+selector: "default",
+protocol: 'starting',
+fn: function (){
+var self=this;
+var $1;
+$1=self["@default"];
+return $1;
+
+},
+//>>excludeStart("ide", pragmas.excludeIdeData);
+args: [],
+source: "default\x0a\x09^ default",
+referencedClasses: [],
+//>>excludeEnd("ide");
+messageSends: []
+}),
+$globals.SMythic.klass);
 
 $core.addMethod(
 $core.method({
@@ -360,18 +434,21 @@ var self=this;
 //>>excludeStart("ctx", pragmas.excludeDebugContexts);
 return $core.withContext(function($ctx1) {
 //>>excludeEnd("ctx");
-$recv(self._new())._augmentPage();
-return self;
+var $1;
+self["@default"]=self._new();
+$recv(self["@default"])._augmentPage();
+$1=self["@default"];
+return $1;
 //>>excludeStart("ctx", pragmas.excludeDebugContexts);
 }, function($ctx1) {$ctx1.fill(self,"start",{},$globals.SMythic.klass)});
 //>>excludeEnd("ctx");
 },
 //>>excludeStart("ide", pragmas.excludeIdeData);
 args: [],
-source: "start\x0a\x09self new augmentPage",
+source: "start\x0a\x09default := self new.\x0a\x09default augmentPage.\x0a\x09^ default",
 referencedClasses: [],
 //>>excludeEnd("ide");
-messageSends: ["augmentPage", "new"]
+messageSends: ["new", "augmentPage"]
 }),
 $globals.SMythic.klass);
 

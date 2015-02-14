@@ -79,7 +79,7 @@ newWithQuery: aQueryString
 ! !
 
 Object subclass: #SMythic
-	instanceVariableNames: ''
+	instanceVariableNames: 'log'
 	package: 'SMythic'!
 
 !SMythic methodsFor: 'action'!
@@ -99,11 +99,28 @@ doJQueryAppend
 augmentPage
 	'#amber-with' asJQuery click: [ self doAmberWith ].
 	'#jquery-append' asJQuery click: [ self doJQueryAppend ]
+!
+
+initialize
+	super initialize.
+	log := SMLog newWithQuery: '#logArea'
+!
+
+log
+	^ log
 ! !
+
+SMythic class instanceVariableNames: 'default'!
 
 !SMythic class methodsFor: 'starting'!
 
+default
+	^ default
+!
+
 start
-	self new augmentPage
+	default := self new.
+	default augmentPage.
+	^ default
 ! !
 
